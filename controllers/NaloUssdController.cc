@@ -69,11 +69,24 @@ void NaloUssdController::handleUssdRequest(const HttpRequestPtr &req, std::funct
                 // Extract only the "result" field
                 Json::Value resultField = responseJson["result"];
                 
+                // Create a new JSON object with uppercase keys
+                Json::Value uppercaseResponse;
+                
+                // Convert each property name to uppercase
+                for (auto const& key : resultField.getMemberNames()) {
+                    // Convert key to uppercase
+                    std::string uppercaseKey = key;
+                    std::transform(uppercaseKey.begin(), uppercaseKey.end(), uppercaseKey.begin(), ::toupper);
+                    
+                    // Copy the value to the new JSON object with uppercase key
+                    uppercaseResponse[uppercaseKey] = resultField[key];
+                }
+                
                 // Convert the result object back to JSON string
                 Json::FastWriter writer;
-                std::string resultJson = writer.write(resultField);
+                std::string resultJson = writer.write(uppercaseResponse);
                 
-                // Create response with just the result field
+                // Create response with the uppercase field names
                 auto clientResponse = drogon::HttpResponse::newHttpResponse();
                 clientResponse->setStatusCode(drogon::HttpStatusCode::k200OK);
                 clientResponse->setContentTypeCode(drogon::CT_APPLICATION_JSON);
@@ -86,7 +99,7 @@ void NaloUssdController::handleUssdRequest(const HttpRequestPtr &req, std::funct
                 auto errorResp = drogon::HttpResponse::newHttpResponse();
                 errorResp->setStatusCode(drogon::HttpStatusCode::k500InternalServerError);
                 errorResp->setContentTypeCode(drogon::CT_APPLICATION_JSON);
-                errorResp->setBody("{\"error\":\"Invalid response format from upstream service\"}");
+                errorResp->setBody("{\"ERROR\":\"Invalid response format from upstream service\"}");
                 callback(errorResp);
             }
         }
@@ -96,7 +109,7 @@ void NaloUssdController::handleUssdRequest(const HttpRequestPtr &req, std::funct
             auto errorResp = drogon::HttpResponse::newHttpResponse();
             errorResp->setStatusCode(drogon::HttpStatusCode::k500InternalServerError);
             errorResp->setContentTypeCode(drogon::CT_APPLICATION_JSON);
-            errorResp->setBody("{\"error\":\"Failed to connect to the upstream service\"}");
+            errorResp->setBody("{\"ERROR\":\"Failed to connect to the upstream service\"}");
             callback(errorResp);
         } });
 }
