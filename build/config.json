@@ -8,7 +8,6 @@
             "https": false
         }
     ],
-    
     "app": {
         //number_of_threads: The number of IO threads, 1 by default, if the value is set to 0, the number of threads
         //is the number of CPU cores
@@ -223,7 +222,7 @@
         "enabled_compressed_request": false,
         // enable_request_stream: Defaults to false. If true the server will enable stream mode for http requests.
         // See the wiki for more details.
-        "enable_request_stream": false,
+        "enable_request_stream": false
     },
     //plugins: Define all plugins running in the application
     "plugins": [
@@ -248,7 +247,7 @@
                 "log_file": "access.log",
                 "log_size_limit": 0,
                 "use_local_time": true,
-                "log_index": 0,
+                "log_index": 0
                 // "show_microseconds": true,
                 // "custom_time_format": "",
                 // "use_real_ip": false
