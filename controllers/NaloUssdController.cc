@@ -46,8 +46,15 @@ void NaloUssdController::handleUssdRequest(const HttpRequestPtr &req, std::funct
     Json::FastWriter writer;
     std::string requestBody = writer.write(requestPayload);
 
+    // Get base URL from configuration
+    auto &config = drogon::app().getCustomConfig();
+    std::string baseUrl = config.get("nalo_api_base_url", "https://wssd-engine-api.rhyoliteprime.com").asString();
+
+    // log the baseurl
+    LOG_DEBUG << "Base URL: " << baseUrl;
+
     // Create HTTP client and request
-    auto client = drogon::HttpClient::newHttpClient("https://wssd-engine-api.rhyoliteprime.com");
+    auto client = drogon::HttpClient::newHttpClient(baseUrl);
     auto apiRequest = drogon::HttpRequest::newHttpRequest();
     apiRequest->setMethod(drogon::HttpMethod::Post);
     apiRequest->setPath("/api/services/app/NaloUssd/HandleInteraction");
