@@ -1,0 +1,62 @@
+name: Build Drogon API for Ubuntu
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Install dependencies for Drogon, PostgreSQL, and Redis
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++ libjsoncpp-dev uuid-dev openssl libssl-dev zlib1g-dev
+          sudo apt install postgresql libhiredis-dev  doxygen graphviz dia
+
+      # Step 3: Download and install Drogon
+      - name: Install Drogon
+        run: |
+          git clone https://github.com/drogonframework/drogon.git
+          cd drogon
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_POSTGRESQL=ON ..
+          make -j$(nproc)
+          sudo make install
+          cd ../..  # Move back to the root directory
+
+      # Step 4: Remove any existing build directory to prevent CMake cache conflicts
+      - name: Clean previous build
+        run: |
+          rm -rf build
+          mkdir build
+
+      # Step 5: Build your application
+      - name: Build Application
+        run: |
+          cd build
+          cmake ..
+          make
+
+      # Step 6: List files in the build directory
+      - name: List build directory files
+        run: |
+          cd build
+          ls -l
+
+      # Step 7: Upload the binary as an artifact using v3
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: wssd-gateway
+          path: build/WssdGateway
+
